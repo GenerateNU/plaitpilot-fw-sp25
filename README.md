@@ -1,2 +1,2 @@
-# ECE Spring 2025 Project Template 
+# PlaitPilot's Firmware Repository - Hardware 
 
