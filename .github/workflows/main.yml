@@ -1,4 +1,4 @@
-name: Generate Hardware CI/CD
+name: PlaitPilot CI/CD
 
 on:
     push:
