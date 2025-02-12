@@ -45,10 +45,6 @@ class VL6180X:
         RESULT__HISTORY_BUFFER_5: 0x05C
         RESULT__HISTORY_BUFFER_6: 0x05E
         RESULT__HISTORY_BUFFER_7: 0x060
-
-    # def open_I2C_bus(self):
-    #     BUS = SMBus(1)
-    #     return BUS
     
     def read_from_register(self, int, register, offset = 0):
         try:
