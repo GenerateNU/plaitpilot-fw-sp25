@@ -416,7 +416,9 @@ void setup()
 
 void loop()
 {
+    Serial.print("Range: ");
     Serial.print(Sensor.readRangeSingleMillimeters());
+    Serial.print(" mm");
     if (Sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
     Serial.println();
 }
