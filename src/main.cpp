@@ -1,29 +1,28 @@
 #include <Arduino.h>
+#include <Adafruit_ILI9341.h>
+#include "lcd.h"
+#include <Adafruit_GFX.h> // Core graphics library
+#include <Adafruit_ILI9341.h>
+#include <SPI.h>
+#include "potentiometer.h"
 
-// You can declare functions at the top!
-
-// Pin number for the LED
-const int ledPin = 13; // Change this if your LED is connected to a different pin
-
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  // Set the LED pin as an output
-  pinMode(ledPin, OUTPUT);
+  lcd_init();
+  update_pot_display(readPotentiometerValues());
 }
 
-void loop() {
-  // Turn the LED on
-  digitalWrite(ledPin, HIGH);
-  delay(1000); // Wait for 1 second
-  Serial.println("LED is on\n");
-
-  // Turn the LED off
-  digitalWrite(ledPin, LOW);
-  delay(1000); // Wait for 1 second
-  Serial.println("LED is on\n");
-
-  Serial.println("Hello??");
-
+void loop()
+{
+  lv_timer_handler();
+  delay(10);
+  if (potentiometerUpdated())
+  {
+    PotValues values = readPotentiometerValues();
+    //Serial.println(values.quantity);
+    update_pot_display(values);
+  }
+  delay(100);
+  // update_pot_display(readPotentiometerValues());
 }
-
-// and then put the function definitions later!
