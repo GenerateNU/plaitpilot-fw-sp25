@@ -17,18 +17,30 @@ enum State {
 
 State curState = GATHER_INPUTS;
 
+PotValues values;
+int currentBunches = 5;
+int totalBunches = 0;
+int currentSize = 0;
+
+// Arcade button connected to GPIO 15
+const int buttonPin = 15;  
+int buttonState = HIGH; 
+
+VL6180X Sensor;
+
 void setup()
 {
   Serial.begin(115200);
   lcd_init();
   update_pot_display(readPotentiometerValues());
+  Wire.begin(19, 18);
+  pinMode(buttonPin, INPUT_PULLUP);
+
+  // tof initilization
+  Sensor.init();
+  Sensor.configureDefault();
+  Sensor.setTimeout(500);
 }
-
-PotValues values;
-
-int currentBunches = 5;
-int totalBunches = 0;
-int currentSize = 0;
 
 void loop()
 {
@@ -43,8 +55,15 @@ void loop()
     
     when the button is pressed
     */
-    currentBunches = 5;
-    curState = DRIVE_MOTOR;
+    values = readPotentiometerValues();
+    if (buttonPressed()) {
+      currentBunches = 5;
+      totalBunches = values.quantity;
+      currentSize = values.size;
+      curState = DRIVE_MOTOR;
+    } else {
+      update_pot_display(values);
+    }
     break;
   case DRIVE_MOTOR:
     if (currentBunches == 0)
@@ -52,6 +71,8 @@ void loop()
       curState = CONTINUE_JOB;
       break;
     }
+
+    int tofVal = Sensor.readRangeSingleMillimeters();
     /*
     gather data from the potentiometer sensor ruler thing
     drive the motor until the sensor reads the correct value (due to the size of the bunch)
@@ -93,4 +114,19 @@ void loop()
   delay(100);
   // update_pot_display(readPotentiometerValues());
   */
+}
+
+
+int readPotentiometerValues()
+{
+  int size = analogRead(34);
+  int quantity = analogRead(35);
+  return PotValues{size, quantity};
+}
+
+bool buttonPressed();
+bool buttonPressed() {
+  buttonState = digitalRead(buttonPin);
+  delay(50);
+  return buttonState == LOW;
 }
