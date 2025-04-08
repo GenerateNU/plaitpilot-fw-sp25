@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 
+
 #define TFT_MISO 19 // (leave TFT SDO disconnected if other SPI devices share MISO)
 #define TFT_MOSI 23
 #define TFT_SCLK 18
@@ -17,7 +18,7 @@
 #define MAX_AMOUNT 50
 
 #define MIN_SIZE 0
-#define MAX_SIZE 6 
+#define MAX_SIZE 6
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI,
                                         TFT_SCLK, TFT_RST, TFT_MISO);
@@ -30,6 +31,10 @@ static lv_obj_t *quantity_label;
 static lv_obj_t *amountBar;
 static lv_obj_t *sizeBar;
 
+// Declaring button text label
+lv_obj_t *button_label;
+
+
 std::map<int, std::string> sizeMap = {
     {0, "XS"},
     {1, "S"},
@@ -37,8 +42,7 @@ std::map<int, std::string> sizeMap = {
     {3, "L"},
     {4, "XL"},
     {5, "XXL"},
-    {6, "XXXL"}
-};
+    {6, "XXXL"}};
 
 void my_disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
 {
@@ -84,7 +88,7 @@ void lcd_init()
     lv_label_set_text(quantity_label, "Quantity: 0");
     lv_obj_align(quantity_label, LV_ALIGN_CENTER, -60, 5);
 
-    // Initialize bars 
+    // Initialize bars
     amountBar = lv_bar_create(lv_screen_active());
     sizeBar = lv_bar_create(lv_screen_active());
 
@@ -97,10 +101,15 @@ void lcd_init()
     lv_obj_align(sizeBar, LV_ALIGN_CENTER, 0, -30);
     lv_bar_set_value(amountBar, 0, LV_ANIM_OFF);
     lv_bar_set_value(sizeBar, 0, LV_ANIM_OFF);
+
+    button_label = lv_label_create(lv_scr_act());
+    lv_obj_align(button_label, LV_ALIGN_BOTTOM_MID, 0, -30); // adjust position as needed
+    lv_label_set_text(button_label, "");                     // Start empty
 }
 
 // Update the display with live potentiometer values**
-void update_pot_display(PotValues values) {
+void update_pot_display(PotValues values)
+{
     static char size_text[16];
     static char quantity_text[16];
 
@@ -119,3 +128,14 @@ void update_pot_display(PotValues values) {
     // Force LVGL to refresh
     lv_refr_now(NULL);
 }
+
+void button_pressed()
+{
+    lv_label_set_text(button_label, "Button Pressed!");
+}
+
+void clear_button_label()
+{
+    lv_label_set_text(button_label, "");
+}
+
