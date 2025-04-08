@@ -5,6 +5,7 @@
 #include <Adafruit_ILI9341.h>
 #include <SPI.h>
 #include "potentiometer.h"
+#include "VL6180X.h"
 
 enum State
 {
@@ -34,9 +35,13 @@ void setup()
   Serial.begin(115200);
   lcd_init();
   update_pot_display(readPotentiometerValues());
-  pinMode(buttonPin, INPUT); // Button
-  pinMode(26, OUTPUT);
 }
+
+PotValues values;
+
+int currentBunches = 5;
+int totalBunches = 0;
+int currentSize = 0;
 
 void loop()
 {
@@ -77,8 +82,15 @@ void loop()
 
     when the button is pressed
     */
-    currentBunches = 5;
-    curState = DRIVE_MOTOR;
+    values = readPotentiometerValues();
+    if (buttonPressed()) {
+      currentBunches = 5;
+      totalBunches = values.quantity;
+      currentSize = values.size;
+      curState = DRIVE_MOTOR;
+    } else {
+      update_pot_display(values);
+    }
     break;
   }
   case DRIVE_MOTOR:
@@ -88,6 +100,8 @@ void loop()
       curState = CONTINUE_JOB;
       break;
     }
+
+    int tofVal = Sensor.readRangeSingleMillimeters();
     /*
     gather data from the potentiometer sensor ruler thing
     drive the motor until the sensor reads the correct value (due to the size of the bunch)
@@ -117,21 +131,20 @@ void loop()
       wait for the button to be pressed
     */
     break;
-
-    /*
-    old stuff idk what it is
-
-    lv_timer_handler();
-    delay(10);
-    if (potentiometerUpdated())
-    {
-      PotValues values = readPotentiometerValues();
-      //Serial.println(values.quantity);
-      update_pot_display(values);
-    }
-    delay(100);
-    // update_pot_display(readPotentiometerValues());
-    */
   }
+
+  /*
+  old stuff idk what it is
+
+  lv_timer_handler();
+  delay(10);
+  if (potentiometerUpdated())
+  {
+    PotValues values = readPotentiometerValues();
+    //Serial.println(values.quantity);
+    update_pot_display(values);
   }
+  delay(100);
+  // update_pot_display(readPotentiometerValues());
+  */
 }
