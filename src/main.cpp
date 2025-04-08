@@ -24,6 +24,7 @@ int currentBunches = 5;
 int totalBunches = 0;
 int currentSize = 0;
 const int buttonPin = 33;
+const int buttonLight = 32;
 bool buttonState = false;
 bool lastButtonState = false;
 unsigned long lastDebounceTime = 0;
@@ -35,6 +36,9 @@ void setup()
   Serial.begin(115200);
   lcd_init();
   update_pot_display(readPotentiometerValues());
+
+  pinMode(buttonLight, OUTPUT); //BUTTON LIGHT PIN
+  pinMode(buttonPin, INPUT); 
 }
 
 PotValues values;
@@ -45,93 +49,78 @@ int currentSize = 0;
 
 void loop()
 {
-  // while (true) 
-  // {
-    
-  //   if (digitalRead(buttonPin)) {
-  //     digitalWrite(26, HIGH);
-  //   }
-  //   else {
-  //     digitalWrite(26, LOW);
-  //   }
-  // }
-  
   switch (curState)
-  {
-  case GATHER_INPUTS:
-  {
-    //clear_button_label();
-    delay(500);
-    while (!digitalRead(buttonPin))
     {
-      Serial.println(digitalRead(buttonPin));
-      if (potentiometerUpdated())
+    case GATHER_INPUTS:
+    {
+      /*
+      while the button is not pressed, read the current potentiometer data
+      update the variable to be whatever the potentiometer data is
+      within the bounds of our sizes 0-10 or whatever (in bunches of 5) (so value of 3 would be 15 bunches)
+      update the display to show the current values of the potentiometers
+
+      when the button is pressed
+      */
+      clear_button_label();
+      delay(500);
+      while (!digitalRead(buttonPin))
       {
-        PotValues values = readPotentiometerValues();
-        update_pot_display(values);
+        Serial.println(digitalRead(buttonPin));
+        if (potentiometerUpdated())
+        {
+          PotValues values = readPotentiometerValues();
+          update_pot_display(values);
+        }
+        //reading = digitalRead(buttonPin);
       }
-      //reading = digitalRead(buttonPin);
-    }
-    button_pressed();
-
-    /*
-    while the button is not pressed, read the current potentiometer data
-    update the variable to be whatever the potentiometer data is
-    within the bounds of our sizes 0-10 or whatever (in bunches of 5) (so value of 3 would be 15 bunches)
-    update the display to show the current values of the potentiometers
-
-    when the button is pressed
-    */
-    values = readPotentiometerValues();
-    if (buttonPressed()) {
+      digitalWrite(buttonLight, HIGH);
+      button_pressed();
+      delay(1000);
+      digitalWrite(buttonLight, LOW);
       currentBunches = 5;
+      curState = DRIVE_MOTOR;
       totalBunches = values.quantity;
       currentSize = values.size;
-      curState = DRIVE_MOTOR;
-    } else {
-      update_pot_display(values);
-    }
-    break;
-  }
-  case DRIVE_MOTOR:
-  {
-    if (currentBunches == 0)
-    {
-      curState = CONTINUE_JOB;
       break;
     }
-
-    int tofVal = Sensor.readRangeSingleMillimeters();
-    /*
-    gather data from the potentiometer sensor ruler thing
-    drive the motor until the sensor reads the correct value (due to the size of the bunch)
-    */
-    curState = HOOK_MOTOR;
-    break;
-  }
-  case HOOK_MOTOR:
-  {
-    /*
-    drive the hook to pick up one bunch of hair (well figure this out through testing)
-    update the display
-    */
-    currentBunches--;
-    break;
-  }
-  case CONTINUE_JOB:
-  {
-    if (totalBunches == 0)
+    case DRIVE_MOTOR:
     {
-      curState = GATHER_INPUTS;
+      if (currentBunches == 0)
+      {
+        curState = CONTINUE_JOB;
+        break;
+      }
+      int tofVal = Sensor.readRangeSingleMillimeters();
+      /*
+      gather data from the potentiometer sensor ruler thing
+      drive the motor until the sensor reads the correct value (due to the size of the bunch)
+      */
+      curState = HOOK_MOTOR;
       break;
     }
-    currentBunches = 5;
-    totalBunches -= 1; // only -1 because this is in bunches of 5
-    /*
-      wait for the button to be pressed
-    */
-    break;
-  }
+    case HOOK_MOTOR:
+    {
+      /*
+      drive the hook to pick up one bunch of hair (well figure this out through testing)
+      update the display
+      */
+      currentBunches--;
+      break;
+    }
+    case CONTINUE_JOB:
+    {
+      if (totalBunches == 0)
+      {
+        curState = GATHER_INPUTS;
+        break;
+      }
+      currentBunches = 5;
+      totalBunches -= 1; // only -1 because this is in bunches of 5
+      /*
+        wait for the button to be pressed
+      */
+      break;
+    }
 
   /*
   old stuff idk what it is
@@ -147,4 +136,5 @@ void loop()
   delay(100);
   // update_pot_display(readPotentiometerValues());
   */
+}
 }
