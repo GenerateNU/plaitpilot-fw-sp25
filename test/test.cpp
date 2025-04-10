@@ -1,46 +1,68 @@
-#include <Arduino.h>
-#include <Adafruit_ILI9341.h>
-#include "lcd.h"
-#include <Adafruit_GFX.h> // Core graphics library
-#include <Adafruit_ILI9341.h>
-#include <SPI.h>
-#include "potentiometer.h"
-#include "VL6180X.h"
-#include <BasicStepperDriver.h>
+#include <Wire.h>
+#include "Adafruit_VL6180X.h"
 
-#define MOTOR_STEPS 200
-#define RPM 30
-#define MICROSTEPS 1
-#define DIR1 32
-#define STEP1 33
-#define DIR2 22
-#define STEP2 23
-
-BasicStepperDriver stepper1(MOTOR_STEPS, DIR1, STEP1);
-BasicStepperDriver stepper2(MOTOR_STEPS, DIR2, STEP2);
+Adafruit_VL6180X vl = Adafruit_VL6180X();
 
 void setup() {
-    Serial.begin(115200);
-    lcd_init();
-    update_pot_display(readPotentiometerValues());
-    Wire.begin(19, 18);
-    pinMode(buttonPin, INPUT_PULLUP);
+  Serial.begin(9600);
+  
 
-    // tof initilization
-    Sensor.init();
-    Sensor.configureDefault();
-    Sensor.setTimeout(500);
-
-    stepper1.begin(RPM, MICROSTEPS);
-    stepper2.begin(RPM, MICROSTEPS);
+  // wait for serial port to open on native usb devices
+  while (!Serial) {
+    delay(1);
+  }
+  
+  Serial.println("Adafruit VL6180x test!");
+  if (! vl.begin()) {
+    Serial.println("Failed to find sensor");
+    while (1);
+  }
+  Serial.println("Sensor found!");
 }
 
 void loop() {
-    do {
-        int tofVal = Sensor.readRangeSingleMillimeters();
-        stepper1.rotate(1);
-        // stepper2.rotate(360);
-        // Pause before repeating
-        // delay(2000);
-    } while (tofVal >= 50)
+  while(true) {
+    Serial.println("PRINTING");
+  }
+  float lux = vl.readLux(VL6180X_ALS_GAIN_5);
+
+  Serial.print("Lux: "); Serial.println(lux);
+  
+  uint8_t range = vl.readRange();
+  uint8_t status = vl.readRangeStatus();
+
+  if (status == VL6180X_ERROR_NONE) {
+    Serial.print("Range: "); Serial.println(range);
+  }
+
+  // Some error occurred, print it out!
+  
+  if  ((status >= VL6180X_ERROR_SYSERR_1) && (status <= VL6180X_ERROR_SYSERR_5)) {
+    Serial.println("System error");
+  }
+  else if (status == VL6180X_ERROR_ECEFAIL) {
+    Serial.println("ECE failure");
+  }
+  else if (status == VL6180X_ERROR_NOCONVERGE) {
+    Serial.println("No convergence");
+  }
+  else if (status == VL6180X_ERROR_RANGEIGNORE) {
+    Serial.println("Ignoring range");
+  }
+  else if (status == VL6180X_ERROR_SNR) {
+    Serial.println("Signal/Noise error");
+  }
+  else if (status == VL6180X_ERROR_RAWUFLOW) {
+    Serial.println("Raw reading underflow");
+  }
+  else if (status == VL6180X_ERROR_RAWOFLOW) {
+    Serial.println("Raw reading overflow");
+  }
+  else if (status == VL6180X_ERROR_RANGEUFLOW) {
+    Serial.println("Range reading underflow");
+  }
+  else if (status == VL6180X_ERROR_RANGEOFLOW) {
+    Serial.println("Range reading overflow");
+  }
+  delay(500);
 }
