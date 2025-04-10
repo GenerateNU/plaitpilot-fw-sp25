@@ -8,7 +8,6 @@
 #include "VL6180X.h"
 #include "BasicStepperDriver.h"
 
-
 enum State
 {
   GATHER_INPUTS = 0, // gather inputs for the size and quantity of hair, and display
@@ -38,7 +37,6 @@ int buttonTimer = 0;
 const int buttonPin = 33;
 const int buttonLED = 32;
 
-
 void setup()
 {
   Serial.begin(115200);
@@ -48,7 +46,6 @@ void setup()
   stepper2.begin(RPM, MICROSTEPS);
   pinMode(buttonPin, INPUT);
   pinMode(buttonLED, OUTPUT);
-
 }
 
 void loop()
@@ -60,10 +57,17 @@ void loop()
     delay(500);
     while (true)
     {
-      buttonTimer += digitalRead(33); 
-      Serial.println(digitalRead(33));
-      if(buttonTimer >= 500) {
-        //break;
+      if (digitalRead(33))
+      {
+        buttonTimer += digitalRead(33);
+        if (buttonTimer >= 500)
+        {
+          break;
+        }
+      }
+      else
+      {
+        buttonTimer = 0;
       }
 
       if (potentiometerUpdated())
@@ -75,7 +79,7 @@ void loop()
     buttonTimer = 0;
     Serial.println("Passed");
     button_pressed();
-    
+
     digitalWrite(buttonLED, HIGH);
     delay(1000);
     digitalWrite(buttonLED, LOW);
@@ -94,9 +98,11 @@ void loop()
       curState = CONTINUE_JOB;
       break;
     }
-    else {
-      //60 is temp, testing to find value, multiple of size
+    else
+    {
+      // 60 is temp, testing to find value, multiple of size
       stepper1.rotate(60);
+      delay(3000);
     }
 
     /*
@@ -115,12 +121,15 @@ void loop()
     */
     currentBunches--;
 
-    //60 is temporary pre testing, though its a constant
+    // 60 is temporary pre testing, though its a constant
     stepper2.rotate(60);
-    if(currentBunches > 0) {
+    delay(3000);
+    if (currentBunches > 0)
+    {
       curState = DRIVE_MOTOR;
     }
-    else {
+    else
+    {
       curState = CONTINUE_JOB;
     }
     break;
@@ -135,10 +144,27 @@ void loop()
     }
     currentBunches = 5;
     totalBunches -= 1; // only -1 because this is in bunches of 5
-    /*
-      wait for the button to be pressed
-    */
-    break;
+    
+    while (true)
+    {
+      if (digitalRead(33))
+      {
+        buttonTimer += digitalRead(33);
+        if (buttonTimer >= 500)
+        {
+          curState = DRIVE_MOTOR;
+          digitalWrite(buttonLED, HIGH);
+          delay(1000);
+          digitalWrite(buttonLED, LOW);
+          break;
+        }
+      }
+      else
+      {
+        buttonTimer = 0;
+      }
+      break;
+    }
   }
-}
+  }
 }
