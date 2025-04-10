@@ -16,6 +16,7 @@ enum State
   // this also updates the display to show the number of bunches left
   CONTINUE_JOB = 3, // continue the job, if there are more bunches to do, wait for button to be pressed
   // this is so the potentiometers don't override the previous values of like whatever - 5
+  ADVANCE_MOTOR = 4, // advance the motor to the next position
 };
 
 #define RPM 120
@@ -36,6 +37,7 @@ int currentSize = 0;
 int buttonTimer = 0;
 const int buttonPin = 33;
 const int buttonLED = 32;
+int tofVal;
 
 void setup()
 {
@@ -46,6 +48,11 @@ void setup()
   stepper2.begin(RPM, MICROSTEPS);
   pinMode(buttonPin, INPUT);
   pinMode(buttonLED, OUTPUT);
+
+  // tof initilization
+  Sensor.init();
+  Sensor.configureDefault();
+  Sensor.setTimeout(500);
 }
 
 void loop()
@@ -87,7 +94,22 @@ void loop()
     currentBunches = 5;
     totalBunches = values.quantity;
     currentSize = values.size;
-    curState = DRIVE_MOTOR;
+    curState = ADVANCE_MOTOR;
+    break;
+  }
+  case ADVANCE_MOTOR:
+  {
+    Serial.println("ADVANCING");
+    /*
+    drive the motor to the next position
+    */
+    tofVal = Sensor.readRangeSingleMillimeters();
+    if (tofVal < 100) {
+      curState = DRIVE_MOTOR;
+      break;
+    }
+    stepper1.rotate(60);
+    delay(1500);
     break;
   }
   case DRIVE_MOTOR:
@@ -114,7 +136,7 @@ void loop()
   }
   case HOOK_MOTOR:
   {
-    Serial.println("HOOKING");
+    Serial.println("HOOKING");  
     /*
     drive the hook to pick up one bunch of hair (well figure this out through testing)
     update the display
