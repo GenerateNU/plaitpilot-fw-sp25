@@ -19,7 +19,6 @@ PotValues readPotentiometerValues() {
 
     if (abs((int)roundedQuantity - (int)lastQuantity) != 0) {
         lastQuantity = roundedQuantity; 
-        Serial.print(analogRead(QTY_POT_PIN));
     }
 
     values.quantity = lastQuantity;

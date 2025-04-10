@@ -403,22 +403,3 @@ uint8_t VL6180X::readRangeStatus()
 }
 
 VL6180X Sensor;
-
-// void setup()
-// {
-//     Serial.begin(115200);
-//     Wire.begin();
-
-//     Sensor.init();
-//     Sensor.configureDefault();
-//     Sensor.setTimeout(500);
-// }
-
-// void loop()
-// {
-//     Serial.print("Range: ");
-//     Serial.print(Sensor.readRangeSingleMillimeters());
-//     Serial.print(" mm");
-//     if (Sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
-//     Serial.println();
-// }

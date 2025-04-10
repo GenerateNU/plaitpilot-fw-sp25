@@ -34,7 +34,8 @@ PotValues values;
 int currentBunches = 5;
 int totalBunches = 0;
 int currentSize = 0;
-const int buttonPin = 26;
+int buttonTimer = 0;
+const int buttonPin = 33;
 const int buttonLED = 32;
 
 
@@ -56,23 +57,23 @@ void loop()
   {
   case GATHER_INPUTS:
   {
-    //clear_button_label();
-    // delay(500);
-    // while(true) { Serial.println(digitalRead(buttonPin)); }
-    while (!digitalRead(buttonPin))
+    delay(500);
+    while (true)
     {
-      
+      buttonTimer += digitalRead(33); 
+      Serial.println(digitalRead(33));
+      if(buttonTimer >= 500) {
+        //break;
+      }
 
       if (potentiometerUpdated())
       {
         PotValues values = readPotentiometerValues();
         update_pot_display(values);
       }
-
-      //reading = digitalRead(buttonPin);
-      delay(5000);
-      break; //debug bypass
     }
+    buttonTimer = 0;
+    Serial.println("Passed");
     button_pressed();
     
     digitalWrite(buttonLED, HIGH);
@@ -87,7 +88,6 @@ void loop()
   }
   case DRIVE_MOTOR:
   {
-    delay(1000);
     Serial.println("DRIVING");
     if (currentBunches <= 0)
     {
@@ -97,12 +97,8 @@ void loop()
     else {
       //60 is temp, testing to find value, multiple of size
       stepper1.rotate(60);
-      delay(1000);
     }
 
-
-    //int tofVal = Sensor.readRangeSingleMillimeters();
-    
     /*
     gather data from the potentiometer sensor ruler thing
     drive the motor until the sensor reads the correct value (due to the size of the bunch)
@@ -112,8 +108,7 @@ void loop()
   }
   case HOOK_MOTOR:
   {
-    delay(1000);
-    Serial.println("hook");
+    Serial.println("HOOKING");
     /*
     drive the hook to pick up one bunch of hair (well figure this out through testing)
     update the display
@@ -122,7 +117,6 @@ void loop()
 
     //60 is temporary pre testing, though its a constant
     stepper2.rotate(60);
-    delay(1000);
     if(currentBunches > 0) {
       curState = DRIVE_MOTOR;
     }
@@ -133,7 +127,7 @@ void loop()
   }
   case CONTINUE_JOB:
   {
-    Serial.println("done");
+    Serial.println("DONE");
     if (totalBunches == 0)
     {
       curState = GATHER_INPUTS;
@@ -146,20 +140,5 @@ void loop()
     */
     break;
   }
-
-  /*
-  old stuff idk what it is
-
-  lv_timer_handler();
-  delay(10);
-  if (potentiometerUpdated())
-  {
-    PotValues values = readPotentiometerValues();
-    //Serial.println(values.quantity);
-    update_pot_display(values);
-  }
-  delay(100);
-  // update_pot_display(readPotentiometerValues());
-  */
 }
 }
