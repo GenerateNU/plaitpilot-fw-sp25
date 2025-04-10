@@ -7,6 +7,7 @@
 #include "potentiometer.h"
 #include "VL6180X.h"
 #include "BasicStepperDriver.h"
+#include "VL6180X.h"
 
 enum State
 {
@@ -38,6 +39,7 @@ int buttonTimer = 0;
 const int buttonPin = 33;
 const int buttonLED = 32;
 int tofVal;
+VL6180X Sensor;
 
 void setup()
 {
@@ -57,6 +59,14 @@ void setup()
 
 void loop()
 {
+  // while(true) {
+  //   Serial1.println(Sensor.readRangeSingleMillimeters());
+  //   while(Sensor.readRangeSingleMillimeters() > 100) {
+  //     stepper1.rotate(1);
+  //   } 
+  //     stepper1.rotate(720);
+  //     delay(3000);
+  // }
   switch (curState)
   {
   case GATHER_INPUTS:

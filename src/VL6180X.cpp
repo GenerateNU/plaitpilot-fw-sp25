@@ -402,4 +402,4 @@ uint8_t VL6180X::readRangeStatus()
   return (readReg(RESULT__RANGE_STATUS) >> 4);
 }
 
-VL6180X Sensor;
+//VL6180X Sensor;
