@@ -4,10 +4,13 @@
 #include <Adafruit_GFX.h> // Core graphics library
 #include <Adafruit_ILI9341.h>
 #include <SPI.h>
+#include <Wire.h>
 #include "potentiometer.h"
 #include "VL6180X.h"
 #include "BasicStepperDriver.h"
 #include "VL6180X.h"
+#include <Adafruit_I2CDevice.h>
+
 
 enum State
 {
@@ -27,6 +30,7 @@ enum State
 #define STEP1 27
 #define DIR2 13
 #define STEP2 14
+
 
 BasicStepperDriver stepper1(MOTOR_STEPS, DIR1, STEP1);
 BasicStepperDriver stepper2(MOTOR_STEPS, DIR2, STEP2);
@@ -52,6 +56,7 @@ void setup()
   pinMode(buttonLED, OUTPUT);
 
   // tof initilization
+  Wire.begin();
   Sensor.init();
   Sensor.configureDefault();
   Sensor.setTimeout(500);
@@ -59,14 +64,14 @@ void setup()
 
 void loop()
 {
-  // while(true) {
-  //   Serial1.println(Sensor.readRangeSingleMillimeters());
-  //   while(Sensor.readRangeSingleMillimeters() > 100) {
-  //     stepper1.rotate(1);
-  //   } 
-  //     stepper1.rotate(720);
-  //     delay(3000);
-  // }
+  while(true) {
+    Serial.println(Sensor.readRangeSingleMillimeters());
+    // while(Sensor.readRangeSingleMillimeters() > 100) {
+    //   stepper1.rotate(1);
+    // } 
+    //   stepper1.rotate(720);
+    //   delay(3000);
+  }
   switch (curState)
   {
   case GATHER_INPUTS:
